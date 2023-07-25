@@ -5,6 +5,7 @@ import bodyParser from "body-parser";
 import qualityrouter from "./routes/quality.route.js";
 import desprouter from "./routes/desp.route.js";
 import clientrouter from "./routes/client.route.js";
+import estimaterouter from "./routes/main.route.js";
 
 
 
@@ -29,10 +30,10 @@ app.use(cors());
 app.use("/quality",qualityrouter);
 app.use("/desp",desprouter);
 app.use("/client",clientrouter);
-
+app.use("/estimate",estimaterouter);
 
 // app.get("/", async(req,res)=>{
-// 	res.json({message : "Server Runing..."})
+// res.json({message : "Server Runing..."})
 // })
 // PORT
 // const port = process.env.PORT || 4000;
