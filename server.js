@@ -1,7 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
-import dotenv from dotenv;
+// import dotenv from .env;
 import bodyParser from "body-parser";
 import qualityrouter from "./routes/quality.route.js";
 import desprouter from "./routes/desp.route.js";
@@ -19,8 +19,7 @@ console.log('Database successfully connected!')
 },
 error => {
 	console.log('Could not connect to database : ' + error)
-}
-)
+})
 
 const app = express();
 app.use(bodyParser.json());
