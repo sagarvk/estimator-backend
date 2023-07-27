@@ -1,7 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
-// import dotenv from .env;
+// import dotenv from dotenv;
 import bodyParser from "body-parser";
 import qualityrouter from "./routes/quality.route.js";
 import desprouter from "./routes/desp.route.js";

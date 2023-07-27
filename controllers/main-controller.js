@@ -6,7 +6,7 @@ import path from "path"
 import { dirname } from "path"
 import ejs from "ejs";
 let contigency=2.50, electrification=2.50;
-const __dirname = dirname(__filename);
+
 
 export const getAmt = async(req,res,next)=>{
     const {customerName,address,plotLength,plotWidth,totalBuiltupArea,floors,projectType,constructionQuality,mobileNo,mailId} = req.body;
@@ -84,24 +84,24 @@ export const getAmt = async(req,res,next)=>{
                 mail: mailId
              }]
 
-             ejs.renderFile(path.join(__dirname, '/views/', "coverpage.ejs"), {userinput: userinput}, (err, data) => {
-                if (err) {
-                      res.send(err);
-                } else {
-                    let options = {
-                        "height": "11.25in",
-                        "width": "8.5in",
-                        "header": {
-                            "height": "20mm"
-                        },
-                        "footer": {
-                            "height": "20mm",
-                        },
-                    };
-                }
-                console.log(data)
-                // res.send("File created successfully");
-            });
+            //  ejs.renderFile(path.join(__dirname, '/views/', "coverpage.ejs"), {userinput: userinput}, (err, data) => {
+            //     if (err) {
+            //           res.send(err);
+            //     } else {
+            //         let options = {
+            //             "height": "11.25in",
+            //             "width": "8.5in",
+            //             "header": {
+            //                 "height": "20mm"
+            //             },
+            //             "footer": {
+            //                 "height": "20mm",
+            //             },
+            //         };
+            //     }
+            //     console.log(data)
+            //     // res.send("File created successfully");
+            // });
 
             res.status(200).json({success:  true, data: estimatecalc})
             genPDF(estimatecalc,customerName,address,barea)
