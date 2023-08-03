@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Invoice</title>
+  <title></title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css">
   <style>
     @media print{
@@ -29,8 +29,26 @@
         height: 150px; /* put the image height here */
         width: 160px; /* put the image width here */
         bottom: 15px;
-        right: 15px;
+        right: 20px;
         
+      }
+      div.divEsignimg{
+        position: fixed !important;
+        background: url('data:image/png;base64,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') !important;
+        background-repeat: no-repeat !important;
+        height: 90px; /* put the image height here */
+        width: 100px; /* put the image width here */
+        bottom: 15px;
+        left: 40px;
+        z-index:0 !important;
+      }
+      div.divEsign{
+        position: fixed !important;
+        font-size: 12px;
+        height: 90px; /* put the image height here */
+        width: 250px; /* put the image width here */
+        bottom: 15px;
+        left: 115px;
       }
     }
     @page { 
@@ -125,6 +143,8 @@
       </tbody>
     </table>
     <div class="divFooter"></div>
+    <div class="divEsign"><b>Digitally Signed by: <%= firmname %> <br> Reason: ESIGN <br> Date: <%= tdate %></b></div>
+    <div class="divEsignimg"></div>
   </div>
 </body>
 </html>
