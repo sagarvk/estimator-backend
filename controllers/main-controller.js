@@ -5,12 +5,33 @@ import { jsPDF } from "jspdf";
 import { applyPlugin } from "jspdf-autotable";
 import DOMPurify from "dompurify";
 import autoTable from "jspdf-autotable";
-import "jspdf-autotable";
-// import autoTable from "jspdf-autotable";
-import path from "path";
-import { dirname } from "path";
 import ejs from "ejs";
+import pdf from "html-pdf";
+import puppeteer from "puppeteer";
+import { readFileSync } from "fs";
+import { render } from "ejs";
+import "jspdf-autotable";
+import path from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+import PDFMerger from "pdf-merger-js";
+import merge from "easy-pdf-merge";
+import pdfMerge from "pdf-merge";
+import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import fs from "fs";
+import crypto from "crypto";
+import SignPDF from "../custom/SignPDF.js";
+// import signer from "node-signpdf";
+import {
+  pdfkitAddPlaceholder,
+  extractSignature,
+  plainAddPlaceholder,
+} from "node-signpdf/dist/helpers/index.js";
+import SignPdfError from "node-signpdf/dist/helpers/index.js";
+import report from "puppeteer-report";
 applyPlugin(jsPDF);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 let contigency = 2.5,
   electrification = 2.5;
@@ -61,7 +82,7 @@ export const getAmt = async (req, res, next) => {
         let qtyc = (eamt * (el.percent / 100)) / el.rate;
         let amtc = eamt * (el.percent / 100);
         let row = {
-          "sr.no": sno,
+          srNo: sno,
           desp: el.desp,
           qty: qtyc.toFixed(2),
           unit: el.unit,
@@ -74,7 +95,7 @@ export const getAmt = async (req, res, next) => {
       // desptable.push(estimatecalc)
       estimatecalc.push(
         {
-          "sr.no": "",
+          srNo: "",
           desp: `Add for Contengencies & Water Charges at ${contigency.toFixed(
             2
           )}%`,
@@ -84,7 +105,7 @@ export const getAmt = async (req, res, next) => {
           amount: camount.toFixed(2),
         },
         {
-          "sr.no": "",
+          srNo: "",
           desp: `Add for Electrification & Other Charges at ${electrification.toFixed(
             2
           )}%`,
@@ -94,7 +115,7 @@ export const getAmt = async (req, res, next) => {
           amount: eamount.toFixed(2),
         },
         {
-          "sr.no": "",
+          srNo: "",
           desp: `TOTAL`,
           qty: "",
           unit: "",
@@ -130,7 +151,7 @@ export const getAmt = async (req, res, next) => {
 
       estimatecalc.forEach((element, index, array) => {
         edata.push([
-          element["sr.no"],
+          element.srNo,
           element.desp,
           element.qty,
           element.unit,
@@ -139,153 +160,181 @@ export const getAmt = async (req, res, next) => {
         ]);
       });
       console.log[edata];
-      const doc = new jsPDF("p", "in", "a4");
-      let pgwidth = doc.internal.pageSize.getWidth();
-      let pgheight = doc.internal.pageSize.getHeight();
 
-      let est = `<html><div><u><b>ESTIMATE</b></u></div></html>`;
+      const template = ` `;
 
-      // doc.html(est, {
-      //   callback: function (doc) {
-      //     // Save the PDF
-      //     console.log(est);
-      //   },
-      //   x: pgwidth / 2,
-      //   y: 1.5,
-      //   width: 8.27, //target width in the PDF document
-      //   windowWidth: 8.27, //window width in CSS pixels
-      // });
-      // doc.text("<u><b>ESTIMATE</b></u>", pgwidth / 2, 1.5, "center");
-      doc.setFontSize(20);
-      doc.setFont("Helvetica", "bold");
-      doc.text("ESTIMATE", pgwidth / 2, 1.5, "center");
-      doc.setFontSize(15);
-      doc.setFont("Helvetica", "bold");
-      doc.text("PROJECT", pgwidth / 2, 3.5, "center");
-      doc.setFont("Helvetica", "normal");
-      doc.text(
-        "PROPOSED " + projectType.toUpperCase(),
-        pgwidth / 2,
-        4.25,
-        "center"
-      );
-      doc.setFont("Helvetica", "bold");
-      doc.text("IN", pgwidth / 2, 5, "center");
-      doc.setFont("Helvetica", "normal");
-      let splitadd = doc.splitTextToSize(address.toUpperCase(), 6);
-      doc.text(splitadd, pgwidth / 2, 5.5, "center");
-      doc.text("OF", pgwidth / 2, 7, "center");
-      doc.setFont("Helvetica", "bold");
-      doc.text(customerName.toUpperCase(), pgwidth / 2, 7.5, "center");
-      doc.setFontSize(20);
-      doc.setFont("Helvetica", "bold");
-      doc.text(firmname.toUpperCase(), pgwidth / 2, 10.25, "center");
-      doc.setFontSize(15);
-      doc.setFont("Helvetica", "normal");
-      doc.text(firmadd1.toUpperCase(), pgwidth / 2, 10.5, "center");
-      doc.text(firmadd2.toUpperCase(), pgwidth / 2, 10.75, "center");
-      doc.text(firmcontact.toUpperCase(), pgwidth / 2, 11.0, "center");
-      doc.setLineWidth(0.0312);
-      doc.rect(0.5, 0.5, pgwidth - 1, pgheight - 1, "S");
-      doc.setLineWidth(0.0156);
-      doc.rect(0.575, 0.575, pgwidth - 1.15, pgheight - 1.15, "S");
-
-      doc.addPage();
-
-      doc.setFontSize(15);
-      doc.setFont("Helvetica", "bold");
-      doc.line(0.5, 2.5, 7.75, 2.5);
-      doc.text("ESTIMATE SUMMARY", pgwidth / 2, 2.8, "center");
-      doc.setFontSize(11);
-      doc.setFont("Helvetica", "bold");
-      doc.line(0.5, 3, 7.75, 3);
-      doc.text("NAME OF CLIENT", 0.75, 3.25);
-      let splitcname = doc.splitTextToSize(customerName.toUpperCase(), 4);
-      doc.text(splitcname, 3.25, 3.25);
-      doc.line(0.5, 3.5, 7.75, 3.5);
-      doc.text("ADDRESS", 0.75, 3.75);
-      let splitaddress = doc.splitTextToSize(address.toUpperCase(), 4);
-      doc.text(splitaddress, 3.25, 3.75);
-      doc.line(0.5, 5.25, 7.75, 5.25);
-      doc.text("PLOT DIMENTION", 0.75, 5.75);
-      doc.text("L (Ft.)", 3.5, 5.5);
-      let flen = bplotlength.toFixed(2);
-      let splitlength = doc.splitTextToSize(flen, 1);
-      doc.text(splitlength, 3.5, 6);
-      doc.text("L (M)", 4.75, 5.5);
-      let mlen = bplotlength / 3.28;
-      mlen = mlen.toFixed(2);
-      let splitmlen = doc.splitTextToSize(mlen, 1);
-      doc.text(splitmlen, 4.75, 6);
-      doc.text("W (Ft.)", 5.75, 5.5);
-      let fwidth = bplotwidht.toFixed(2);
-      let splitwidth = doc.splitTextToSize(fwidth, 1);
-      doc.text(splitwidth, 5.75, 6);
-      doc.text("W (M)", 6.75, 5.5);
-      let mwid = bplotwidht / 3.28;
-      mwid = mwid.toFixed(2);
-      let splitmwid = doc.splitTextToSize(mwid, 1);
-      doc.text(splitmwid, 6.75, 6);
-      doc.line(3, 5.75, 7.75, 5.75);
-      doc.line(4.25, 5.25, 4.25, 6.25);
-      doc.line(5.5, 5.25, 5.5, 6.25);
-      doc.line(6.5, 5.25, 6.5, 6.25);
-
-      doc.line(0.5, 6.25, 7.75, 6.25);
-      doc.text("TOTAL BULILTUP AREA", 0.75, 6.75);
-      doc.text("SQ.FT.", 3.75, 6.5);
-      let farea = barea.toFixed(2);
-      let splitbarea = doc.splitTextToSize(farea, 1);
-      doc.text(splitbarea, 3.75, 7);
-      doc.line(5.25, 6.25, 5.25, 7.25);
-      doc.text("SQ.M.", 6.25, 6.5);
-      let marea = barea / 10.764;
-      marea = marea.toFixed(3);
-      let splitmarea = doc.splitTextToSize(marea, 1);
-
-      doc.text(splitmarea, 6.25, 7);
-      doc.line(3, 6.75, 7.75, 6.75);
-
-      doc.line(0.5, 7.25, 7.75, 7.25);
-      doc.text("NO. OF FLOORS", 0.75, 7.5);
-      let floornum = String(numOfFloors);
-      doc.text(floornum, 3.5, 7.5);
-      doc.line(0.5, 7.75, 7.75, 7.75);
-
-      doc.text("TOTAL ESTIMATE AMOUNT", 0.75, 8);
-      doc.text(tamt.toFixed(2), 4.25, 8);
-      doc.line(0.5, 8.25, 7.75, 8.25);
-      doc.text("APPROXIMATE RATE PER SQ.FT.", 0.75, 8.5);
-      let apprate = tamt / barea;
-      apprate = apprate.toFixed(2);
-      apprate = String(apprate);
-      doc.text(apprate, 4.25, 8.5);
-      doc.line(0.5, 8.75, 7.75, 8.75);
-
-      doc.line(0.5, 2.5, 0.5, 8.75);
-      doc.line(3, 3, 3, 7.75);
-      doc.line(4, 7.75, 4, 8.75);
-
-      doc.line(7.75, 2.5, 7.75, 8.75);
-
-      doc.addPage();
-
-      doc.autoTable({
-        columnStyles: { 5: { halign: "right" } },
-        head: [["SR.NO.", "DESCRIPTION", "QUANTITY", "UNIT", "RATE", "AMOUNT"]],
-        body: edata,
-        theme: "plain",
-        headStyles: {
-          lineWidth: 0.0104,
-          lineColor: [0, 0, 0],
+      var options = {
+        format: "A4",
+        margin: {
+          top: "0.5in",
+          right: "0.5in",
+          bottom: "0.5in",
+          left: "0.5in",
         },
-        bodyStyles: {
-          lineWidth: 0.0104,
-          lineColor: [0, 0, 0],
+      };
+      const htmlMarkup = ejs.render(template, {
+        data: edata,
+      });
+
+      pdf
+        .create(htmlMarkup, options)
+        .toFile("./estimate.pdf", function (err, res) {
+          if (err) return console.log(err);
+          console.log(res);
+        });
+
+      (async () => {
+        const detailpage = readFileSync("./views/detailpage.html", {
+          encoding: "utf-8",
+        });
+        const summarypage = readFileSync("./views/summarypage.html", {
+          encoding: "utf-8",
+        });
+
+        const htmlMarkupdetailpage = render(detailpage, { edata });
+        const htmlMarkupsummarypage = render(summarypage, {
+          name: customerName.toUpperCase(),
+          add: address.toUpperCase(),
+          lenft: parseInt(plotLength).toFixed(2),
+          lenmt: (plotLength / 3.28).toFixed(2),
+          widft: parseInt(plotWidth).toFixed(2),
+          widmt: (plotWidth / 3.28).toFixed(2),
+          areasqft: barea.toFixed(2),
+          areasqmt: (barea / 10.764).toFixed(2),
+          floors: parseInt(numOfFloors).toFixed(2),
+          totalamt: tamt.toFixed(2),
+          ratepersqft: (tamt / barea).toFixed(2),
+        });
+
+        const browser = await puppeteer.launch();
+        const page = await browser.newPage();
+
+        await page.setContent(htmlMarkupdetailpage);
+
+        const footerTemplate = `
+        <p style="align:right; margin: auto;font-size: 12px;">
+          Page <span class="pageNumber">pageNumber+1</span>
+            of 
+          <span class="totalPages">{$ }totalPages+1</span>
+          </p>
+        `;
+        let img = `<img src="../stamp.png" width="160" height="150" style="float: right;vertical-align:right;margin:200px 50px">`;
+        await page.pdf({
+          path: "report.pdf",
+          format: "a4",
+          displayHeaderFooter: true,
+          printBackground: true,
+          footerTemplate: footerTemplate,
+          margin: { top: 100, bottom: 60 },
+        });
+        await page.setContent(htmlMarkupsummarypage);
+
+        await page.pdf({
+          path: "summary.pdf",
+          format: "a4",
+        });
+
+        await browser.close();
+      })().then(() => {
+        ///pdf-merger-js
+
+        let merger = new PDFMerger();
+        (async () => {
+          await merger.add("summary.pdf"); //merge all pages. parameter is the path to file and filename.
+          await merger.add("report.pdf"); //merge all pages. parameter is the path to file and filename.
+          await merger.save("merged.pdf"); //save under given name and reset the internal document
+
+          // Export the merged PDF as a nodejs Buffer
+          // const mergedPdfBuffer = await merger.saveAsBuffer();
+          // fs.writeSync('merged.pdf', mergedPdfBuffer);
+        })();
+
+        ///////
+      });
+
+      // ///pdf-lib
+
+      // var pdfBuffer1 = await fs.readFileSync("./summary.pdf");
+      // var pdfBuffer2 = await fs.readFileSync("./report.pdf");
+
+      // var pdfsToMerge = [pdfBuffer1, pdfBuffer2];
+
+      // const mergedPdf = await PDFDocument.create();
+      // for (const pdfBytes of pdfsToMerge) {
+      //   const pdf = await PDFDocument.load(pdfBytes);
+      //   const copiedPages = await mergedPdf.copyPages(
+      //     pdf,
+      //     pdf.getPageIndices()
+      //   );
+      //   copiedPages.forEach((page) => {
+      //     mergedPdf.addPage(page);
+      //   });
+      // }
+
+      // const buf = await mergedPdf.save(); // Uint8Array
+
+      // let path = "merged final.pdf";
+      // fs.open(path, "w", function (err, fd) {
+      //   fs.write(fd, buf, 0, buf.length, null, function (err) {
+      //     fs.close(fd, function () {
+      //       console.log("wrote the file successfully");
+      //     });
+      //   });
+      // });
+
+      // /////////
+
+      ///Create Digital Certificates
+      const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
+        modulusLength: 2048,
+        publicKeyEncoding: {
+          type: "pkcs1",
+          format: "pem",
+        },
+        privateKeyEncoding: {
+          type: "pkcs1",
+          format: "pem",
         },
       });
 
-      doc.save("table.pdf");
+      // Writing keys to files.
+      fs.writeFileSync("./keys/private.key", privateKey);
+      fs.writeFileSync("./keys/public.key", publicKey);
+
+      // Reading keys from files.
+      const pvtKey = privateKey;
+      const pubKey = publicKey;
+
+      const data = Buffer.from("VKON CONSULTANTS");
+
+      const signature = crypto
+        .sign("RSA-SHA256", data, pvtKey)
+        .toString("base64");
+      console.log("Signing done", signature);
+
+      const verify = crypto.verify(
+        "RSA-SHA256",
+        data,
+        pubKey,
+        Buffer.from(signature, "base64")
+      );
+      console.log("verfy done", verify);
+
+      ////sign the pdf
+
+      const pdfBuffer = new SignPDF(
+        path.resolve("./mergeds.pdf"),
+        path.resolve("./keys/cert.p12")
+      );
+
+      const signedDocs = await pdfBuffer.signPDF();
+      const randomNumber = Math.floor(Math.random() * 5000);
+      const pdfName = `../exported_file_${randomNumber}.pdf`;
+
+      fs.writeFileSync(pdfName, signedDocs);
+      console.log(`New Signed PDF created called: ${pdfName}`);
+
+      ///////
     }
   }
 };

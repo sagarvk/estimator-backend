@@ -1,7 +1,7 @@
-import ejs from 'ejs';
-import pdf from 'html-pdf';
+import ejs from "ejs";
+import pdf from "html-pdf";
 
-var options = { format: 'Letter' };
+var options = { format: "A4" };
 
 const template = `
 <!DOCTYPE html>
@@ -66,11 +66,11 @@ const template = `
 `;
 
 const htmlMarkup = ejs.render(template, {
-  name: 'Namibian Chitta',
-  address: 'Janglatlya Bhokat',
+  name: "Namibian Chitta",
+  address: "Janglatlya Bhokat",
 });
 
-pdf.create(htmlMarkup, options).toFile('./estimate.pdf', function (err, res) {
+pdf.create(htmlMarkup, options).toFile("./estimate.pdf", function (err, res) {
   if (err) return console.log(err);
   console.log(res);
 });
