@@ -9,8 +9,6 @@ import estimaterouter from "./routes/main.route.js";
 import { getDbUrl } from './db/db.js'
 import ptyperouter from "./routes/ptype.route.js";
 
-console.log(process.env.NODE_ENV);
-
 // Express Route
 
 // Connecting MongoDB Database
