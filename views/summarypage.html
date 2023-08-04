@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estimate Summary</title>
+  <!-- Link Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    @media print{
+      table { page-break-after:auto }
+      tr    { page-break-inside:avoid; page-break-after:auto }
+      td    { page-break-inside:avoid; page-break-after:auto }
+      thead { display:table-header-group }
+      tfoot { display:table-footer-group }
+    }
+    @page { 
+      size: auto;
+      margin: 0.75in 0.5in 0.75in 0.5in;}
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      width: 8.27in; /* A4 width in inches */
+      height: 11.69in; /* A4 height in inches */
+      margin: 1.00in auto;
+      padding: 1rem;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+
+    h2 {
+      text-align: center;
+      margin: 30px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+      font-size: 25px;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h2><b>ESTIMATE SUMMARY</b></h2>
+    <table class="table">
+      <tbody>
+        <tr>
+          <td colspan="1"><b>NAME OF CLIENT</b> </td>
+          <td colspan="4"><b><%= name %></b></td>
+        </tr>
+        <tr>
+          <td colspan="1"><b>ADDRESS</b> </td>
+          <td colspan="4"><b><%= add %></b></td>
+        </tr>
+        <tr>
+          <td rowspan="2"><b>PLOT DIMENSION</b></td>
+          <td><b>L (Ft.)</b></td>
+          <td><b>L (M)</b></td>
+          <td><b>W (Ft.)</b></td>
+          <td><b>W (M)</b></td>
+        </tr>
+        <tr>
+            <td><b><%= lenft %></td>
+            <td><b><%= lenmt %></td>
+            <td><b><%= widft %></td>
+            <td><b><%= widmt %></td>
+        </tr>
+        <tr>
+            <td rowspan="2"><b>TOTAL BUILTUP AREA</b></td>
+            <td colspan="2"><b>SQ.FT.</b></td>
+            <td colspan="2"><b>SQ.M.</b></td>   
+        </tr>
+        <tr>
+            <td colspan="2"><b><%= areasqft %></b></td>
+            <td colspan="2"><b><%= areasqmt %></b></td>   
+        </tr>
+        <tr>
+            <td colspan="1"><b>NO. OF FLOORS </b></td>
+            <td colspan="4"><b><%= floors %></b></td>
+        </tr>
+        <tr>
+            <td colspan="1"> <b> ESTIMATE AMOUT </b></td>
+            <td colspan="4"><b><%= totalamt %></td>
+        </tr>
+        <tr>
+            <td colspan="1"><b>APPROXIMATE RATE PER SQ.FT. </b></td>
+            <td colspan="4"><b><%= ratepersqft %></b></td>
+        </tr>
+
+        <!-- Add more rows as needed -->
+      </tbody>
+    </table>
+  </div>
+</body>
+
+</html>

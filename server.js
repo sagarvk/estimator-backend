@@ -7,9 +7,8 @@ import desprouter from "./routes/desp.route.js";
 import clientrouter from "./routes/client.route.js";
 import estimaterouter from "./routes/main.route.js";
 import { getDbUrl } from './db/db.js'
+import ptyperouter from "./routes/ptype.route.js";
 
-
-console.log(getDbUrl())
 console.log(process.env.NODE_ENV);
 
 // Express Route
@@ -17,9 +16,9 @@ console.log(process.env.NODE_ENV);
 // Connecting MongoDB Database
 mongoose.Promise = global.Promise;
 mongoose.connect(getDbUrl())
-	.then(() => app.listen(process.env.PORT))
-	.then(() => console.log('Database successfully connected!'))
-	.catch(error => console.log('Could not connect to database : ', error))
+  .then(() => app.listen(process.env.PORT))
+  .then(() => console.log('Database successfully connected!'))
+  .catch(error => console.log('Could not connect to database : ', error))
 
 const app = express();
 app.use(bodyParser.json());
