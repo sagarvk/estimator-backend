@@ -6,8 +6,11 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "cross-env NODE_ENV=production node server.js",
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "launch": "npm run deploy",
+    "prelaunch": "node scripts/seed"
   },
   "keywords": [],
   "author": "",
@@ -22,6 +25,11 @@
     "mongodb": "^5.7.0",
     "mongoose": "^7.4.0",
     "nodemon": "^3.0.1",
-    "puppeteer": "^20.9.0"
+    "puppeteer": "^20.9.0",
+    "tar-fs": "^3.0.4",
+    "unrar-promise": "^3.1.0"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
   }
 }
