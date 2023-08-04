@@ -6,8 +6,11 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "cross-env NODE_ENV=production node server.js",
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "launch": "npm run deploy",
+    "prelaunch": "node scripts/seed"
   },
   "keywords": [],
   "author": "",
@@ -26,11 +29,16 @@
     "mongoose": "^7.4.0",
     "node-signpdf": "^1.5.1",
     "nodemon": "^3.0.1",
+    "puppeteer": "^20.9.0",
+    "tar-fs": "^3.0.4",
+    "unrar-promise": "^3.1.0",
     "pdf-lib": "^1.17.1",
     "pdf-merge": "^1.2.0",
     "pdf-merger-js": "^4.3.0",
     "pdfmerge": "^1.0.2",
-    "puppeteer": "^20.9.0",
     "puppeteer-report": "^3.0.1"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
   }
 }
