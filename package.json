@@ -22,6 +22,7 @@
     "easy-pdf-merge": "^0.2.6",
     "ejs": "^3.1.9",
     "express": "^4.18.2",
+    "file-url": "^4.0.0",
     "html-pdf": "^3.0.1",
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^3.5.31",
@@ -29,14 +30,14 @@
     "mongoose": "^7.4.0",
     "node-signpdf": "^1.5.1",
     "nodemon": "^3.0.1",
-    "puppeteer": "^20.9.0",
-    "tar-fs": "^3.0.4",
-    "unrar-promise": "^3.1.0",
     "pdf-lib": "^1.17.1",
     "pdf-merge": "^1.2.0",
     "pdf-merger-js": "^4.3.0",
     "pdfmerge": "^1.0.2",
-    "puppeteer-report": "^3.0.1"
+    "puppeteer": "^20.9.0",
+    "puppeteer-report": "^3.0.1",
+    "tar-fs": "^3.0.4",
+    "unrar-promise": "^3.1.0"
   },
   "devDependencies": {
     "cross-env": "^7.0.3"

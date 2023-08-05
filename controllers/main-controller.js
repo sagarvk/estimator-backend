@@ -17,7 +17,17 @@ import { dirname } from "path";
 import PDFMerger from "pdf-merger-js";
 import pdfMerge from "pdf-merge";
 import fs from "fs";
-
+import {
+  PDFDocument,
+  PDFName,
+  PDFNumber,
+  PDFHexString,
+  PDFString,
+  StandardFonts,
+  rgb,
+} from "pdf-lib";
+import fileUrl from "file-url";
+import { Console } from "console";
 // applyPlugin(jsPDF);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -132,12 +142,10 @@ export const getAmt = async (req, res, next) => {
       res.status(200).json({ success: true, data: estimatecalc });
 
       let edata = [];
-      let firmname = "VKON CONSULTANTS";
-      let firmadd1 = "At : Nimgaon Korhale, Post : Laxmiwadi, Tal : Rahata,";
-      let firmadd2 = "Ahmednagar - 423 109";
-      let firmcontact =
-        "Mob - +91- 9960 867 555, 9859 121 121 | Email - abc@gmail.com";
-
+      let firmname = process.env.FIRM_NAME;
+      let firmadd1 = process.env.FIRM_ADD1;
+      let firmadd2 = process.env.FIRM_ADD2;
+      let firmcontact = process.env.FIRM_CONTACT;
       estimatecalc.forEach((element, index, array) => {
         edata.push([
           element.srNo,
@@ -253,204 +261,72 @@ export const getAmt = async (req, res, next) => {
 
       // ///pdf-lib
 
-      // var pdfBuffer1 = await fs.readFileSync("./summary.pdf");
-      // var pdfBuffer2 = await fs.readFileSync("./report.pdf");
+      (async () => {
+        var pdfBuffer1 = await fs.readFileSync("./summary.pdf");
+        var pdfBuffer2 = await fs.readFileSync("./report.pdf");
 
-      // var pdfsToMerge = [pdfBuffer1, pdfBuffer2];
+        var pdfsToMerge = [pdfBuffer1, pdfBuffer2];
 
-      // const mergedPdf = await PDFDocument.create();
-      // for (const pdfBytes of pdfsToMerge) {
-      //   const pdf = await PDFDocument.load(pdfBytes);
-      //   const copiedPages = await mergedPdf.copyPages(
-      //     pdf,
-      //     pdf.getPageIndices()
-      //   );
-      //   copiedPages.forEach((page) => {
-      //     mergedPdf.addPage(page);
-      //   });
-      // }
+        const mergedPdf = await PDFDocument.create();
+        for (const pdfBytes of pdfsToMerge) {
+          const pdf = await PDFDocument.load(pdfBytes);
+          const copiedPages = await mergedPdf.copyPages(
+            pdf,
+            pdf.getPageIndices()
+          );
+          copiedPages.forEach((page) => {
+            mergedPdf.addPage(page);
+          });
+        }
 
-      // const buf = await mergedPdf.save(); // Uint8Array
+        const buf = await mergedPdf.save(); // Uint8Array
 
-      // let path = "merged final.pdf";
-      // fs.open(path, "w", function (err, fd) {
-      //   fs.write(fd, buf, 0, buf.length, null, function (err) {
-      //     fs.close(fd, function () {
-      //       console.log("wrote the file successfully");
-      //     });
-      //   });
-      // });
+        let path = "merged final.pdf";
+        fs.open(path, "w", function (err, fd) {
+          fs.write(fd, buf, 0, buf.length, null, function (err) {
+            fs.close(fd, function () {
+              console.log("wrote the file successfully");
+            });
+          });
+        });
+      })();
+      // .then(() => {
+      //   (async () => {
+      //     const pdfData = fs.readFileSync("./mergeds.pdf");
 
-      // /////////
-
-      // (async () => {
-      //   try {
-      //     // Load the PDF file you want to sign
-      //     const pdfPath = path.join(__dirname, "../mergeds.pdf");
-      //     const pdfBytes = fs.readFileSync(pdfPath);
-      //     console.log(pdfPath);
-
-      //     // Load your private key (you will need to replace 'private-key.pfx' with your actual private key file)
-      //     const privateKeyPath = path.join(__dirname, "../keys/cert.p12");
-      //     const privateKeyPassword = "1234"; // Replace with your private key password
-      //     const privateKeyBytes = fs.readFileSync(privateKeyPath);
-      //     console.log(privateKeyBytes);
-      //     // Load the PDF document
-
-      //     const pdfDoc = await PDFDocument.load(pdfBytes);
-      //     const DEFAULT_BYTE_RANGE_PLACEHOLDER = "**********";
-      //     const SIGNATURE_LENGTH = 3322;
-
-      //     const page = pdfDoc.getPages()[0]; // Assume the signature is on the first page
-      //     const pages = pdfDoc.getPages(); // Assume the signature is on the first page
-
-      //     // Create a new signature
-      //     const signatureDict = pdfDoc.context.obj({
-      //       Type: PDFName.of("Sig"),
-      //       Filter: PDFName.of("Adobe.PPKLite"),
-      //       SubFilter: PDFName.of("adbe.pkcs7.detached"),
-      //       ByteRange: [0, 0, 0, 0],
-      //       Contents: PDFHexString.of("A".repeat(SIGNATURE_LENGTH)),
-      //       Reason: PDFString.of("Digital Signture"),
-      //       M: PDFString.fromDate(new Date()),
-      //     });
-
-      //     const signatureDictRef = pdfDoc.context.register(signatureDict);
-
-      //     // Add the signature dictionary to the document
-      //     const widgetDict = pdfDoc.context.obj({
-      //       Type: "Annot",
-      //       Subtype: "Widget",
-      //       FT: "Sig",
-      //       Rect: [0, 0, 0, 0], // Signature rect size
-      //       V: signatureDictRef,
-      //       T: PDFString.of("test signature"),
-      //       F: 4,
-      //       P: pages[0].ref,
-      //     });
-
-      //     const widgetDictRef = pdfDoc.context.register(widgetDict);
-
-      //     // Add signature widget to the first page
-      //     pages[0].node.set(
-      //       PDFName.of("Annots"),
-      //       pdfDoc.context.obj([widgetDictRef])
-      //     );
-
-      //     pdfDoc.catalog.set(
-      //       PDFName.of("AcroForm"),
-      //       pdfDoc.context.obj({
-      //         SigFlags: 3,
-      //         Fields: [widgetDictRef],
-      //       })
-      //     );
-
-      //     // Create the signature using the private key and password
-      //     // const { createPrivateKey } = require("crypto");
-      //     // const privateKey = createPrivateKey({
-      //     //   key: privateKeyBytes,
-      //     //   format: "p12",
-      //     //   passphrase: privateKeyPassword,
-      //     // });
-
-      //     // Sign the PDF using the private key
-      //     // const signature = await pdfDoc.sign(
-      //     //   0, // Index of the signature field
-      //     //   privateKeyBytes,
-      //     //   {
-      //     //     reason: "I am the author of this document",
-      //     //     name: "Your Name",
-      //     //   } // Replace with your name
+      //     // const arrayBuffer = await fetch(pdfData).then((res) =>
+      //     //   res.arrayBuffer()
       //     // );
-
-      //     // Save the signed PDF to a new file
-      //     const signedPdfPath = path.join(__dirname, "../signed-pdf.pdf");
-      //     const signedPdfBytes = await pdfDoc.save({ useObjectStreams: false });
-      //     let spdf = signer.sign(signedPdfBytes, privateKeyBytes);
-      //     fs.writeFileSync(signedPdfPath, signedPdfBytes);
-
-      //     console.log("PDF signed and saved successfully:", signedPdfPath);
-      //   } catch (error) {
-      //     console.error("Error signing the PDF:", error);
-      //   }
-      // })();
-
-      ///////////////
-
-      ///Create Digital Certificates
-      // const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
-      //   modulusLength: 2048,
-      //   publicKeyEncoding: {
-      //     type: "pkcs1",
-      //     format: "pem",
-      //   },
-      //   privateKeyEncoding: {
-      //     type: "pkcs1",
-      //     format: "pem",
-      //   },
+      //     const content = await PDFDocument.load(pdfData);
+      //     // Add a font to the doc
+      //     const helveticaFont = await content.embedFont(
+      //       StandardFonts.Helvetica
+      //     );
+      //     // Draw a number at the bottom of each page.
+      //     // Note that the bottom of the page is `y = 0`, not the top
+      //     const pages = await content.getPages();
+      //     for (const [i, page] of Object.entries(pages)) {
+      //       page.drawText(`Page ${+i + 1} of ${pages}`, {
+      //         x: page.getWidth() / 2,
+      //         y: 10,
+      //         size: 15,
+      //         font: helveticaFont,
+      //         color: rgb(0, 0, 0),
+      //       })();
+      //     }
+      //     let pathpdf = "merged final with no.pdf";
+      //     fs.open(pathpdf, "w", function (err, fd) {
+      //       fs.write(fd, content, 0, content.length, null, function (err) {
+      //         fs.close(fd, function () {
+      //           console.log("wrote the file successfully");
+      //         });
+      //       });
+      //     });
+      //   })();
+      //   /////////////
       // });
 
-      // // Writing keys to files.
-      // fs.writeFileSync("./keys/private.key", privateKey);
-      // fs.writeFileSync("./keys/public.key", publicKey);
-
-      // // Reading keys from files.
-      // const pvtKey = privateKey;
-      // const pubKey = publicKey;
-
-      // const data = Buffer.from("some data");
-
-      // const signature = crypto
-      //   .sign("RSA-SHA256", data, pvtKey)
-      //   .toString("base64");
-      // console.log("Signing done", signature);
-
-      // const verify = crypto.verify(
-      //   "RSA-SHA256",
-      //   data,
-      //   pubKey,
-      //   Buffer.from(signature, "base64")
-      // );
-      // console.log("verfy done", verify);
-
       //////
-
-      // async () => {
-      //   const p12Buffer = fs.readFileSync(".keys/cert.p12");
-
-      //   let pdfBuffer = fs.readFileSync(`${__dirname}/mergeds.pdf`);
-      //   pdfBuffer = plainAddPlaceholder({
-      //     pdfBuffer,
-      //     reason: "I have reviewed it.",
-      //     signatureLength: 1612,
-      //   });
-      //   pdfBuffer = signer.sign(pdfBuffer, p12Buffer);
-
-      //   const { signature, signedData } = extractSignature(pdfBuffer);
-      //   // expect(typeof signature === "string").toBe(true);
-      //   // expect(signedData instanceof Buffer).toBe(true);
-      //   console.log(pdfBuffer);
-      // };
-
-      //////
-
-      ////sign the pdf
-
-      // (async () => {
-      //   const pdfBuffer = new SignPDF(
-      //     path.resolve("./mergeds.pdf"),
-      //     path.resolve("./keys/cert.p12")
-      //   );
-
-      //   const signedDocs = await pdfBuffer.signPDF();
-      //   const randomNumber = Math.floor(Math.random() * 5000);
-      //   const pdfName = `../exported_file_${randomNumber}.pdf`;
-
-      //   fs.writeFileSync(pdfName, signedDocs);
-      //   console.log(`New Signed PDF created called: ${pdfName}`);
-      // })();
-
-      ///////
     }
   }
 };
