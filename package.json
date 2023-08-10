@@ -17,6 +17,7 @@
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
+    "crypto": "^1.0.1",
     "dompurify": "^3.0.5",
     "dotenv": "^16.3.1",
     "easy-pdf-merge": "^0.2.6",
@@ -36,6 +37,7 @@
     "pdfmerge": "^1.0.2",
     "puppeteer": "^20.9.0",
     "puppeteer-report": "^3.0.1",
+    "razorpay": "^2.9.1",
     "tar-fs": "^3.0.4",
     "unrar-promise": "^3.1.0"
   },

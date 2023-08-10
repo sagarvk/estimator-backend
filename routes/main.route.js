@@ -2,13 +2,20 @@ import express from "express";
 
 const estimaterouter = express.Router();
 
+import {
+  getAmt,
+  getEAmt,
+  genpayOrder,
+  payVerify,
+} from "../controllers/main-controller.js";
 
-import { getAmt } from "../controllers/main-controller.js";
-
-
-
-//Get Estimate Amt Data
+//Get Estimate PDF Data
 estimaterouter.post("/", getAmt);
-
+//Get Estimate Estimate Amount Data
+estimaterouter.post("/eamt", getEAmt);
+//Generate Payment Order
+estimaterouter.post("/createorder", genpayOrder);
+//Generate Payment Order
+estimaterouter.post("/payverify", payVerify);
 
 export default estimaterouter;

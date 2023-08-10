@@ -26,8 +26,10 @@ import {
   StandardFonts,
   rgb,
 } from "pdf-lib";
+import crypto from "crypto";
 import fileUrl from "file-url";
 import { Console } from "console";
+import Razorpay from "razorpay";
 // applyPlugin(jsPDF);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -138,8 +140,6 @@ export const getAmt = async (req, res, next) => {
           mail: mailId,
         },
       ];
-
-      res.status(200).json({ success: true, data: estimatecalc });
 
       let edata = [];
       let firmname = process.env.FIRM_NAME;
@@ -327,7 +327,224 @@ export const getAmt = async (req, res, next) => {
       // });
 
       //////
+
+      res
+        .status(200)
+        .json({ success: true, data: estimatecalc, amtData: tamt });
     }
+  }
+};
+
+export const getEAmt = async (req, res, next) => {
+  const {
+    customerName,
+    address,
+    plotLength,
+    plotWidth,
+    totalBuiltupArea,
+    numOfFloors,
+    projectType,
+    constructionQuality,
+    mobileNo,
+    mailId,
+  } = req.body;
+  let qData, despdetails, conrate, eamt, tamt, camount, eamount;
+  let estimatecalc = [];
+  let desptable = [];
+  let barea = parseInt(totalBuiltupArea);
+  let bplotlength = parseInt(plotLength);
+  let bplotwidht = parseInt(plotWidth);
+  try {
+    qData = await Quality.findOne({ name: constructionQuality });
+  } catch (err) {
+    console.log(err);
+  }
+  if (!qData) {
+    return res.status(404).json({ message: "No Data Found" });
+  } else {
+    conrate = qData.rate;
+    eamt = conrate * barea;
+    camount = eamt * (contigency / 100);
+    eamount = eamt * (electrification / 100);
+    tamt = eamt + camount + eamount;
+    try {
+      despdetails = await Desp.find({ category: projectType });
+    } catch (err) {
+      console.log(err);
+    }
+    if (!despdetails) {
+      return res.status(404).json({ message: "No Data Found" });
+    } else {
+      let sno = 0;
+      estimatecalc = despdetails.map((el) => {
+        sno += 1;
+        let qtyc = (eamt * (el.percent / 100)) / el.rate;
+        let amtc = eamt * (el.percent / 100);
+        let row = {
+          srNo: sno,
+          desp: el.desp,
+          qty: qtyc.toFixed(2),
+          unit: el.unit,
+          rate: el.rate.toFixed(2),
+          amount: amtc.toFixed(2),
+        };
+        return row;
+      });
+
+      // desptable.push(estimatecalc)
+      estimatecalc.push(
+        {
+          srNo: "",
+          desp: `Add for Contengencies & Water Charges at ${contigency.toFixed(
+            2
+          )}%`,
+          qty: "",
+          unit: "",
+          rate: "",
+          amount: camount.toFixed(2),
+        },
+        {
+          srNo: "",
+          desp: `Add for Electrification & Other Charges at ${electrification.toFixed(
+            2
+          )}%`,
+          qty: "",
+          unit: "",
+          rate: "",
+          amount: eamount.toFixed(2),
+        },
+        {
+          srNo: "",
+          desp: `TOTAL`,
+          qty: "",
+          unit: "",
+          rate: "",
+          amount: tamt.toFixed(2),
+        }
+      );
+
+      //  res.status(200).json({success:  true, data: estimatecalc})
+      let userinput = [
+        {
+          name: customerName,
+          add: address,
+          length: plotLength,
+          width: plotWidth,
+          btarea: barea,
+          floor: numOfFloors,
+          prtype: projectType,
+          conq: constructionQuality,
+          mob: mobileNo,
+          mail: mailId,
+        },
+      ];
+
+      let edata = [];
+      let firmname = process.env.FIRM_NAME;
+      let firmadd1 = process.env.FIRM_ADD1;
+      let firmadd2 = process.env.FIRM_ADD2;
+      let firmcontact = process.env.FIRM_CONTACT;
+      estimatecalc.forEach((element, index, array) => {
+        edata.push([
+          element.srNo,
+          element.desp,
+          element.qty,
+          element.unit,
+          element.rate,
+          element.amount,
+        ]);
+      });
+
+      //   (async () => {
+      //     const pdfData = fs.readFileSync("./mergeds.pdf");
+
+      //     // const arrayBuffer = await fetch(pdfData).then((res) =>
+      //     //   res.arrayBuffer()
+      //     // );
+      //     const content = await PDFDocument.load(pdfData);
+      //     // Add a font to the doc
+      //     const helveticaFont = await content.embedFont(
+      //       StandardFonts.Helvetica
+      //     );
+      //     // Draw a number at the bottom of each page.
+      //     // Note that the bottom of the page is `y = 0`, not the top
+      //     const pages = await content.getPages();
+      //     for (const [i, page] of Object.entries(pages)) {
+      //       page.drawText(`Page ${+i + 1} of ${pages}`, {
+      //         x: page.getWidth() / 2,
+      //         y: 10,
+      //         size: 15,
+      //         font: helveticaFont,
+      //         color: rgb(0, 0, 0),
+      //       })();
+      //     }
+      //     let pathpdf = "merged final with no.pdf";
+      //     fs.open(pathpdf, "w", function (err, fd) {
+      //       fs.write(fd, content, 0, content.length, null, function (err) {
+      //         fs.close(fd, function () {
+      //           console.log("wrote the file successfully");
+      //         });
+      //       });
+      //     });
+      //   })();
+      //   /////////////
+      // });
+
+      //////
+
+      res
+        .status(200)
+        .json({ success: true, data: estimatecalc, amtData: tamt });
+    }
+  }
+};
+
+export const genpayOrder = async (req, res, next) => {
+  const {
+    customerName,
+    address,
+    plotLength,
+    plotWidth,
+    totalBuiltupArea,
+    numOfFloors,
+    projectType,
+    constructionQuality,
+    mobileNo,
+    mailId,
+  } = req.body;
+  let instance = new Razorpay({
+    key_id: process.env.key_id,
+    key_secret: process.env.key_secret,
+  });
+
+  let payamt = parseInt(process.env.PAY_AMT);
+  let options = {
+    amount: payamt * 100, // amount in the smallest currency unit
+    currency: "INR",
+    // receipt: "order_rcptid_11",
+  };
+  instance.orders.create(options, function (err, order) {
+    if (err) {
+      return res.send({ code: 500, message: "Sever Err" });
+    }
+    return res.send({ code: 200, message: "order created", data: order });
+  });
+};
+
+export const payVerify = async (req, res, next) => {
+  let body =
+    req.body.response.razorpay_order_id +
+    "|" +
+    req.body.response.razorpay_payment_id;
+
+  var expectedSignature = crypto
+    .createHmac("sha256", process.env.key_secret)
+    .update(body.toString())
+    .digest(`hex`);
+  if (expectedSignature === req.body.response.razorpay_signature) {
+    res.send({ code: 200, message: "Valid Sign" });
+  } else {
+    res.send({ code: 500, message: "Invalid Sign" });
   }
 };
 
