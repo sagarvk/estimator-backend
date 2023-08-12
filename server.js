@@ -6,17 +6,19 @@ import qualityrouter from "./routes/quality.route.js";
 import desprouter from "./routes/desp.route.js";
 import clientrouter from "./routes/client.route.js";
 import estimaterouter from "./routes/main.route.js";
-import { getDbUrl } from './db/db.js'
+import { getDbUrl } from "./db/db.js";
 import ptyperouter from "./routes/ptype.route.js";
+import masterrouter from "./routes/master.route.js";
 
 // Express Route
 
 // Connecting MongoDB Database
 mongoose.Promise = global.Promise;
-mongoose.connect(getDbUrl())
+mongoose
+  .connect(getDbUrl())
   .then(() => app.listen(process.env.PORT))
-  .then(() => console.log('Database successfully connected!'))
-  .catch(error => console.log('Could not connect to database : ', error))
+  .then(() => console.log("Database successfully connected!"))
+  .catch((error) => console.log("Could not connect to database : ", error));
 
 const app = express();
 app.use(bodyParser.json());
@@ -27,3 +29,5 @@ app.use("/quality", qualityrouter);
 app.use("/desp", desprouter);
 app.use("/client", clientrouter);
 app.use("/estimate", estimaterouter);
+app.use("/ptype", ptyperouter);
+app.use("/master", masterrouter);

@@ -36,8 +36,17 @@ let clientSchema = new Schema(
     mail: {
       type: String,
     },
+    order_id: {
+      type: String,
+    },
+    payment_id: {
+      type: String,
+    },
     fees: {
       type: Number,
+    },
+    pstatus: {
+      type: String,
     },
     pid: {
       type: String,
@@ -45,7 +54,8 @@ let clientSchema = new Schema(
   },
   {
     collection: "client",
-  }
+  },
+  { timestamps: true }
 );
 
 export default mongoose.model("Client", clientSchema);

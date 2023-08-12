@@ -1,11 +1,9 @@
-import quality from "../models/Quality.js";
+import master from "../models/Master.js";
 
 export const getAllData = async (req, res, next) => {
   let qData;
-  let prjType = req.body.projectType;
-  // ptype: prjType
   try {
-    qData = await quality.find({ ptype: prjType });
+    qData = await master.find({});
   } catch (err) {
     console.log(err);
   }

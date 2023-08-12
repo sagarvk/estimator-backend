@@ -15,4 +15,4 @@ let ptypeSchema = new Schema(
   }
 );
 
-export default mongoose.model("Ptype", qualitySchema);
+export default mongoose.model("Ptype", ptypeSchema);
