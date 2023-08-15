@@ -3,14 +3,14 @@ import express from "express";
 const estimaterouter = express.Router();
 
 import {
-  getAmt,
+  getPdf,
   getEAmt,
   genpayOrder,
   payVerify,
 } from "../controllers/main-controller.js";
 
 //Get Estimate PDF Data
-estimaterouter.post("/", getAmt);
+estimaterouter.post("/", getPdf);
 //Get Estimate Estimate Amount Data
 estimaterouter.post("/eamt", getEAmt);
 //Generate Payment Order

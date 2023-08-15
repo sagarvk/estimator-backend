@@ -120,15 +120,34 @@
         <tr>
           <th>SR. NO.</th>
           <th>DESCRIPTION</th>
-          <th>QUANTITY</th>
+          <th>QTY</th>
           <th>UNIT</th>
           <th>RATE</th>
           <th>AMOUNT</th>
         </tr>
       </thead>
       <tbody>
-        <% for(let row of edata){ %>
+        <% for(let row of edata){ 
+          if (row==lrow) { %>
 
+          <tr>
+            <th scope="row"><%= row[0] %></th>
+            <td colspan="4"><b><%= row[1] %></b></td>
+            <!-- <td><%= row[2] %></td>
+            <td><%= row[3] %></td>
+            <td><%= row[4] %></td> -->
+            <td><b><%= row[5] %></b></td>
+
+
+            <!-- <th scope="row"><%= row[0] %></th>
+            <td><%= row[1] %></td>
+            <td><%= row[2] %></td>
+            <td><%= row[3] %></td>
+            <td><%= row[4] %></td>
+            <td><%= row[5] %></td> -->
+          </tr>
+
+          <% } else { %>
           <tr>
             <th scope="row"><%= row[0] %></th>
             <td><%= row[1] %></td>
@@ -138,10 +157,11 @@
             <td><%= row[5] %></td>
           </tr>
 
-          <% } %>
+          <% }} %>
         
       </tbody>
     </table>
+    <!-- <div> Total Rows :<%= lrow %></div> -->
     <div class="divFooter"></div>
     <div class="divEsign"><b>Digitally Signed by: <%= firmname %> <br> Reason: ESIGN <br> Date: <%= tdate %></b></div>
     <div class="divEsignimg"></div>

@@ -1,4 +1,4 @@
-import Quality from "../models/Quality.js";
+import quality from "../models/Quality.js";
 import Desp from "../models/Desp.js";
 import Client from "../models/Client.js";
 // import { jsPDF } from "jspdf";
@@ -37,7 +37,7 @@ const __dirname = dirname(__filename);
 let contigency = 2.5,
   electrification = 2.5;
 
-export const getAmt = async (req, res, next) => {
+export const getPdf = async (req, res, next) => {
   const {
     customerName,
     address,
@@ -57,14 +57,20 @@ export const getAmt = async (req, res, next) => {
   let bplotlength = parseInt(plotLength);
   let bplotwidht = parseInt(plotWidth);
   try {
-    qData = await Quality.findOne({ name: constructionQuality });
+    qData = await quality.find({
+      $and: [
+        { name: { $regex: constructionQuality } },
+        { ptype: { $regex: projectType } },
+      ],
+    });
   } catch (err) {
     console.log(err);
   }
-  if (!qData) {
+  if (!qData || !qData.length) {
     return res.status(404).json({ message: "No Data Found" });
   } else {
-    conrate = qData.rate;
+    conrate = qData[0].rate;
+    console.log(conrate);
     eamt = conrate * barea;
     camount = eamt * (contigency / 100);
     eamount = eamt * (electrification / 100);
@@ -169,8 +175,10 @@ export const getAmt = async (req, res, next) => {
           left: "0.5in",
         },
       };
+      let totalrows = 30;
       const htmlMarkup = ejs.render(template, {
         data: edata,
+        totalrows,
       });
 
       // pdf
@@ -193,12 +201,15 @@ export const getAmt = async (req, res, next) => {
         let mm = String(todaydate.getMonth() + 1).padStart(2, "0"); //January is 0!
         let yyyy = todaydate.getFullYear();
 
-        todaydate = mm + "." + dd + "." + yyyy;
+        todaydate = dd + "." + mm + "." + yyyy;
+        let lrow = edata.length;
+        console.log(lrow);
 
         const htmlMarkupdetailpage = render(detailpage, {
           edata,
           firmname: firmname,
           tdate: todaydate,
+          lrow: lrow,
         });
         const htmlMarkupsummarypage = render(summarypage, {
           name: customerName.toUpperCase(),
@@ -230,7 +241,7 @@ export const getAmt = async (req, res, next) => {
         await page.pdf({
           path: "report.pdf",
           format: "a4",
-          displayHeaderFooter: true,
+          displayHeaderFooter: false,
           printBackground: true,
           footerTemplate: footerTemplate,
           margin: { top: 100, bottom: 60 },
@@ -240,6 +251,7 @@ export const getAmt = async (req, res, next) => {
         await page.pdf({
           path: "summary.pdf",
           format: "a4",
+          printBackground: true,
         });
 
         await browser.close();
@@ -281,15 +293,38 @@ export const getAmt = async (req, res, next) => {
 
         const buf = await mergedPdf.save(); // Uint8Array
 
-        let path = "merged final.pdf";
-        fs.open(path, "w", function (err, fd) {
+        let fpath = `files/${customerName}.pdf`;
+        fs.open(fpath, "w", function (err, fd) {
           fs.write(fd, buf, 0, buf.length, null, function (err) {
             fs.close(fd, function () {
               console.log("wrote the file successfully");
             });
           });
         });
-      })();
+      })().then(() => {
+        let filepath = path.resolve(__dirname, `../files/${customerName}.pdf`);
+        console.log(filepath);
+
+        fs.readFile(filepath, (err, file) => {
+          if (err) {
+            console.log(err);
+            res.status(500).json({ success: false, message: "Error" });
+          }
+
+          res.setHeader("Content-Type", "application/pdf");
+          res.setHeader(
+            "Content-Disposition",
+            `attachment; filename=${customerName}.pdf`
+          );
+
+          // res.sendFile(filepath, {
+          //   headers: { "Content-Type": "application/pdf" },
+          // });
+          // res.status(200).json({ success: true, data: filepath });
+
+          res.send(filepath);
+        });
+      });
       // .then(() => {
       //   (async () => {
       //     const pdfData = fs.readFileSync("./mergeds.pdf");
@@ -327,10 +362,11 @@ export const getAmt = async (req, res, next) => {
       // });
 
       //////
+      // res.sendfile();
+      // fs.readFile(path);
 
-      res
-        .status(200)
-        .json({ success: true, data: estimatecalc, amtData: tamt });
+      // res.status(200).json({ success: true, data: estimatecalc });
+      // res.sendFile(__dirname + "/merged final.pdf");
     }
   }
 };
@@ -354,15 +390,22 @@ export const getEAmt = async (req, res, next) => {
   let barea = parseInt(totalBuiltupArea);
   let bplotlength = parseInt(plotLength);
   let bplotwidht = parseInt(plotWidth);
+  // { $regex: constructionQuality }
+  // { $regex: projectType }
   try {
-    qData = await Quality.findOne({ name: constructionQuality });
+    qData = await quality.find({
+      $and: [
+        { name: { $regex: constructionQuality } },
+        { ptype: { $regex: projectType } },
+      ],
+    });
   } catch (err) {
     console.log(err);
   }
-  if (!qData) {
+  if (!qData || !qData.length) {
     return res.status(404).json({ message: "No Data Found" });
   } else {
-    conrate = qData.rate;
+    conrate = qData[0].rate;
     eamt = conrate * barea;
     camount = eamt * (contigency / 100);
     eamount = eamt * (electrification / 100);
@@ -561,7 +604,10 @@ const getRates = async (req, res, next) => {
   const constructionQuality = req.body.constructionQuality;
   let qData;
   try {
-    qData = await Quality.findOne({ name: constructionQuality });
+    qData = await Quality.findOne({
+      name: constructionQuality,
+      pname: projectType,
+    });
   } catch (err) {
     console.log(err);
   }
