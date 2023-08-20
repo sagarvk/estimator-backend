@@ -223,6 +223,7 @@ export const getPdf = async (req, res, next) => {
           floors: parseInt(numOfFloors).toFixed(2),
           totalamt: tamt.toFixed(2),
           ratepersqft: (tamt / barea).toFixed(2),
+          firmname: firmname,
         });
 
         const browser = await puppeteer.launch({ headless: "true" });
@@ -311,18 +312,21 @@ export const getPdf = async (req, res, next) => {
             res.status(500).json({ success: false, message: "Error" });
           }
 
+          // res.setHeader("Content-Type", "application/pdf");
+          // res.setHeader(
+          //   "Content-Disposition",
+          //   `attachment; filename=${customerName}.pdf`
+          // );
+          // res.status(200).json({ success: true, data: filepath });
+          // res.sendFile(filepath, {
+          //   headers: { "Content-Type": "application/pdf" },
+          // });
           res.setHeader("Content-Type", "application/pdf");
           res.setHeader(
             "Content-Disposition",
             `attachment; filename=${customerName}.pdf`
           );
-
-          // res.sendFile(filepath, {
-          //   headers: { "Content-Type": "application/pdf" },
-          // });
-          // res.status(200).json({ success: true, data: filepath });
-
-          res.send(filepath);
+          res.sendFile(filepath);
         });
       });
       // .then(() => {
