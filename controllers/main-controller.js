@@ -17,6 +17,7 @@ import { dirname } from "path";
 import PDFMerger from "pdf-merger-js";
 import pdfMerge from "pdf-merge";
 import fs from "fs";
+import { unlinkSync } from "fs";
 import {
   PDFDocument,
   PDFName,
@@ -152,6 +153,9 @@ export const getPdf = async (req, res, next) => {
       let firmadd1 = process.env.FIRM_ADD1;
       let firmadd2 = process.env.FIRM_ADD2;
       let firmcontact = process.env.FIRM_CONTACT;
+      let randomreportname = `report_${customerName}_${getRandomFileName()}`;
+      let randomsummaryname = `summary_${customerName}_${getRandomFileName()}`;
+      let randommergedfile = `merged_${customerName}_${getRandomFileName()}`;
       estimatecalc.forEach((element, index, array) => {
         edata.push([
           element.srNo,
@@ -181,13 +185,6 @@ export const getPdf = async (req, res, next) => {
         totalrows,
       });
 
-      // pdf
-      //   .create(htmlMarkup, options)
-      //   .toFile("./estimate.pdf", function (err, res) {
-      //     if (err) return console.log(err);
-      //     console.log(res);
-      //   });
-
       (async () => {
         const detailpage = readFileSync("./views/detailpage.html", {
           encoding: "utf-8",
@@ -203,7 +200,6 @@ export const getPdf = async (req, res, next) => {
 
         todaydate = dd + "." + mm + "." + yyyy;
         let lrow = edata.length;
-        console.log(lrow);
 
         const htmlMarkupdetailpage = render(detailpage, {
           edata,
@@ -227,6 +223,7 @@ export const getPdf = async (req, res, next) => {
         });
 
         const browser = await puppeteer.launch({ headless: "true" });
+
         const page = await browser.newPage();
 
         await page.setContent(htmlMarkupdetailpage);
@@ -240,7 +237,7 @@ export const getPdf = async (req, res, next) => {
         `;
         let img = `<img src="../stamp.png" width="160" height="150" style="float: right;vertical-align:right;margin:200px 50px">`;
         await page.pdf({
-          path: "report.pdf",
+          path: `./files/raw/${randomreportname}.pdf`,
           format: "a4",
           displayHeaderFooter: false,
           printBackground: true,
@@ -250,85 +247,128 @@ export const getPdf = async (req, res, next) => {
         await page.setContent(htmlMarkupsummarypage);
 
         await page.pdf({
-          path: "summary.pdf",
+          path: `./files/raw/${randomsummaryname}.pdf`,
           format: "a4",
           printBackground: true,
         });
-
         await browser.close();
       })().then(() => {
         ///pdf-merger-js
-
         let merger = new PDFMerger();
         (async () => {
-          await merger.add("summary.pdf"); //merge all pages. parameter is the path to file and filename.
-          await merger.add("report.pdf"); //merge all pages. parameter is the path to file and filename.
-          await merger.save("merged.pdf"); //save under given name and reset the internal document
+          await merger.add(`./files/raw/${randomsummaryname}.pdf`); //merge all pages. parameter is the path to file and filename.
+          await merger.add(`./files/raw/${randomreportname}.pdf`); //merge all pages. parameter is the path to file and filename.
+          await merger.save(`./files/raw/${randommergedfile}.pdf`); //save under given name and reset the internal document
           // Export the merged PDF as a nodejs Buffer
           // const mergedPdfBuffer = await merger.saveAsBuffer();
           // fs.writeSync('merged.pdf', mergedPdfBuffer);
-        })();
 
-        ///////
-      });
-
-      // ///pdf-lib
-
-      (async () => {
-        var pdfBuffer1 = await fs.readFileSync("./summary.pdf");
-        var pdfBuffer2 = await fs.readFileSync("./report.pdf");
-
-        var pdfsToMerge = [pdfBuffer1, pdfBuffer2];
-
-        const mergedPdf = await PDFDocument.create();
-        for (const pdfBytes of pdfsToMerge) {
-          const pdf = await PDFDocument.load(pdfBytes);
-          const copiedPages = await mergedPdf.copyPages(
-            pdf,
-            pdf.getPageIndices()
-          );
-          copiedPages.forEach((page) => {
-            mergedPdf.addPage(page);
-          });
-        }
-
-        const buf = await mergedPdf.save(); // Uint8Array
-
-        let fpath = `files/${customerName}.pdf`;
-        fs.open(fpath, "w", function (err, fd) {
-          fs.write(fd, buf, 0, buf.length, null, function (err) {
-            fs.close(fd, function () {
-              console.log("wrote the file successfully");
-            });
-          });
-        });
-      })().then(() => {
-        let filepath = path.resolve(__dirname, `../files/${customerName}.pdf`);
-        console.log(filepath);
-
-        fs.readFile(filepath, (err, file) => {
-          if (err) {
-            console.log(err);
-            res.status(500).json({ success: false, message: "Error" });
-          }
-
-          // res.setHeader("Content-Type", "application/pdf");
-          // res.setHeader(
-          //   "Content-Disposition",
-          //   `attachment; filename=${customerName}.pdf`
+          // ///Merge PDF using pdf-lib
+          // var pdfBuffer1 = await fs.readFileSync(
+          //   `./files/raw/${randomsummaryname}.pdf`
           // );
-          // res.status(200).json({ success: true, data: filepath });
-          // res.sendFile(filepath, {
-          //   headers: { "Content-Type": "application/pdf" },
-          // });
-          res.setHeader("Content-Type", "application/pdf");
-          res.setHeader(
-            "Content-Disposition",
-            `attachment; filename=${customerName}.pdf`
+          // var pdfBuffer2 = await fs.readFileSync(
+          //   `./files/raw/${randomreportname}.pdf`
+          // );
+
+          // var pdfsToMerge = [pdfBuffer1, pdfBuffer2];
+
+          // const mergedPdf = await PDFDocument.create();
+          // for (const pdfBytes of pdfsToMerge) {
+          //   const pdf = await PDFDocument.load(pdfBytes);
+          //   const copiedPages = await mergedPdf.copyPages(
+          //     pdf,
+          //     pdf.getPageIndices()
+          //   );
+          //   copiedPages.forEach((page) => {
+          //     mergedPdf.addPage(page);
+          //   });
+          // }
+          // const buf = await mergedPdf.save(); // Uint8Array
+          // let fpath = `./files/${customerName}.pdf`;
+          // fs.writeFileSync(fpath, await mergedPdf.save());
+          ///////////////////////
+
+          //////////////
+
+          //Add Page Numbers
+          const content = await PDFDocument.load(
+            fs.readFileSync(`./files/raw/${randommergedfile}.pdf`)
           );
-          res.sendFile(filepath);
+          // Add a font to the doc
+          const helveticaFont = await content.embedFont(
+            StandardFonts.Helvetica
+          );
+          // Draw a number at the bottom of each page.
+          // Note that the bottom of the page is `y = 0`, not the top
+          const pages = await content.getPages();
+          let pagecount = pages.length;
+
+          for (const [i, page] of Object.entries(pages)) {
+            page.drawText(`Page ${+i + 1} of ${pagecount}`, {
+              x: page.getWidth() - 100,
+              y: 30,
+              size: 12,
+              font: helveticaFont,
+              color: rgb(0, 0, 0),
+            });
+          }
+          // Write the PDF to a file
+          fs.writeFileSync(`./files/${customerName}.pdf`, await content.save());
+          /////////////////
+
+          /////////////
+
+          // fs.open(fpath, "w", function (err, fd) {
+          //   fs.write(fd, buf, 0, buf.length, null, function (err) {
+          //     fs.close(fd, function () {
+          //       console.log("wrote the file successfully");
+          //     });
+          //   });
+          // });
+        })().then(() => {
+          let filepath = path.resolve(
+            __dirname,
+            `../files/${customerName}.pdf`
+          );
+
+          fs.readFile(filepath, (err, file) => {
+            if (err) {
+              console.log(err);
+              res.status(500).json({ success: false, message: "Error" });
+            }
+
+            // res.setHeader("Content-Type", "application/pdf");
+            // res.setHeader(
+            //   "Content-Disposition",
+            //   `attachment; filename=${customerName}.pdf`
+            // );
+            // res.status(200).json({ success: true, data: filepath });
+            // res.sendFile(filepath, {
+            //   headers: { "Content-Type": "application/pdf" },
+            // });
+            res.setHeader("Content-Type", "application/pdf");
+            res.setHeader(
+              "Content-Disposition",
+              `attachment; filename=${customerName}.pdf`
+            );
+            res.sendFile(filepath);
+            ////Delete temp files
+
+            try {
+              unlinkSync(`./files/raw/${randomreportname}.pdf`);
+              unlinkSync(`./files/raw/${randomsummaryname}.pdf`);
+              unlinkSync(`./files/raw/${randommergedfile}.pdf`);
+              console.log(`successfully deleted `);
+            } catch (error) {
+              console.error("there was an error:", error.message);
+            }
+
+            /////////
+          });
         });
       });
+
       // .then(() => {
       //   (async () => {
       //     const pdfData = fs.readFileSync("./mergeds.pdf");
@@ -545,6 +585,13 @@ export const getEAmt = async (req, res, next) => {
     }
   }
 };
+
+function getRandomFileName() {
+  var timestamp = new Date().toISOString().replace(/[-:.]/g, "");
+  var random = ("" + Math.random()).substring(2, 8);
+  var random_number = timestamp + random;
+  return random_number;
+}
 
 export const genpayOrder = async (req, res, next) => {
   const {
