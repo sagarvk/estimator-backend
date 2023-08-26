@@ -31,6 +31,7 @@ import crypto from "crypto";
 import fileUrl from "file-url";
 import { Console } from "console";
 import Razorpay from "razorpay";
+import nodemailer from "nodemailer";
 // applyPlugin(jsPDF);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -50,7 +51,10 @@ export const getPdf = async (req, res, next) => {
     constructionQuality,
     mobileNo,
     mailId,
+    orderId,
+    payId,
   } = req.body;
+
   let qData, despdetails, conrate, eamt, tamt, camount, eamount;
   let estimatecalc = [];
   let desptable = [];
@@ -156,6 +160,7 @@ export const getPdf = async (req, res, next) => {
       let randomreportname = `report_${customerName}_${getRandomFileName()}`;
       let randomsummaryname = `summary_${customerName}_${getRandomFileName()}`;
       let randommergedfile = `merged_${customerName}_${getRandomFileName()}`;
+      let finalPDF = `${customerName}_${getRandomFileName()}`;
       estimatecalc.forEach((element, index, array) => {
         edata.push([
           element.srNo,
@@ -314,7 +319,7 @@ export const getPdf = async (req, res, next) => {
             });
           }
           // Write the PDF to a file
-          fs.writeFileSync(`./files/${customerName}.pdf`, await content.save());
+          fs.writeFileSync(`./files/${finalPDF}.pdf`, await content.save());
           /////////////////
 
           /////////////
@@ -327,10 +332,7 @@ export const getPdf = async (req, res, next) => {
           //   });
           // });
         })().then(() => {
-          let filepath = path.resolve(
-            __dirname,
-            `../files/${customerName}.pdf`
-          );
+          let filepath = path.resolve(__dirname, `../files/${finalPDF}.pdf`);
 
           fs.readFile(filepath, (err, file) => {
             if (err) {
@@ -353,6 +355,18 @@ export const getPdf = async (req, res, next) => {
               `attachment; filename=${customerName}.pdf`
             );
             res.sendFile(filepath);
+            ///Sendmail
+
+            sendMail(
+              customerName,
+              mobileNo,
+              mailId,
+              orderId,
+              payId,
+              address,
+              filepath
+            );
+
             ////Delete temp files
 
             try {
@@ -585,6 +599,151 @@ export const getEAmt = async (req, res, next) => {
     }
   }
 };
+
+function sendMail(
+  customerName,
+  mobileNo,
+  emailId,
+  orderId,
+  payId,
+  address,
+
+  filepath
+) {
+  let amtPaid = 499;
+  let transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false, // upgrade later with STARTTLS
+    auth: {
+      user: process.env.MAIL_ID,
+      pass: process.env.MAIL_PASS,
+    },
+  });
+
+  let message = {
+    from: "estimatorproconsultants@gmail.com",
+    to: emailId,
+    subject: "Thankyou for Purchase!!!",
+    text: "",
+    html: `<!DOCTYPE html>
+    <html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            @media screen and (max-width: 600px) {
+                .container {
+                    width: 100% !important;
+                }
+            }
+    
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: Arial, sans-serif;
+                background-color: #f2f2f2;
+            }
+    
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #ffffff;
+                border-radius: 5px;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            }
+    
+            .header {
+                background-color: #007bff;
+                color: white;
+                text-align: center;
+                padding: 20px;
+                border-radius: 5px 5px 0 0;
+            }
+    
+            .table-container {
+                margin-top: 20px;
+            }
+    
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+    
+            th, td {
+                padding: 10px;
+                text-align: left;
+                border-bottom: 1px solid #ddd;
+            }
+    
+            th {
+                background-color: #f2f2f2;
+            }
+    
+            .footer {
+                margin-top: 20px;
+                padding: 10px;
+                text-align: center;
+                background-color: #f2f2f2;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1 style="margin: 0;">Thank You for Estimate Purchase</h1>
+                <p style="margin-top: 10px;">We appreciate your business!</p>
+            </div>
+            <div class="table-container">
+                <table>
+                    <tr>
+                        <th>Client Name</th>
+                        <td>${customerName}</td>
+                    </tr>
+                    <tr>
+                        <th>Address</th>
+                        <td>${address}</td>
+                    </tr>
+                    <tr>
+                        <th>Amount Paid</th>
+                        <td>${amtPaid}</td>
+                    </tr>
+                    <tr>
+                        <th>Order ID</th>
+                        <td>${orderId}</td>
+                    </tr>
+                    <tr>
+                        <th>Payment ID</th>
+                        <td>${payId}</td>
+                    </tr>
+                    <tr>
+                        <th>Email</th>
+                        <td>${emailId}</td>
+                    </tr>
+                    <tr>
+                        <th>Mobile No.</th>
+                        <td>${mobileNo}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="footer">
+                <p>For any inquiries, please contact us at <a href="mailto:contact@example.com">contact@example.com</a>.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    `,
+    attachments: [
+      {
+        // file on disk as an attachment
+        filename: `${customerName}.pdf`,
+        path: filepath, // stream this file
+      },
+    ],
+  };
+
+  transporter.sendMail(message);
+}
 
 function getRandomFileName() {
   var timestamp = new Date().toISOString().replace(/[-:.]/g, "");

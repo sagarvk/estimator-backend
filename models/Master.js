@@ -24,6 +24,18 @@ let masterSchema = new Schema(
     charges: {
       type: Number,
     },
+    discount: {
+      type: Number,
+    },
+    smtpclient: {
+      type: String,
+    },
+    user: {
+      type: String,
+    },
+    pass: {
+      type: String,
+    },
   },
   {
     collection: "master",

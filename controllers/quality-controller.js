@@ -5,7 +5,7 @@ export const getAllData = async (req, res, next) => {
   let prjType = req.body.projectType;
   // ptype: prjType
   try {
-    qData = await quality.find({ ptype: prjType });
+    qData = await quality.find({});
   } catch (err) {
     console.log(err);
   }
@@ -17,17 +17,12 @@ export const getAllData = async (req, res, next) => {
 
 export const searchData = async (req, res, next) => {
   let qData;
-  let prjType = req.body.projectType;
+  let prjid = req.body.projectType;
   let constructionQuality = req.body.constructionQuality;
   let projectType = req.body.projectType;
   // ptype: prjType
   try {
-    qData = await quality.find({
-      $and: [
-        { name: { $regex: constructionQuality } },
-        { ptype: { $regex: projectType } },
-      ],
-    });
+    qData = await quality.find({ _id: prjid });
   } catch (err) {
     console.log(err);
   }

@@ -7,7 +7,7 @@ import { getAllData, searchData } from "../controllers/quality-controller.js";
 // let qualitySchema = require("../models/Quality");
 
 //Get Quality Data
-qualityrouter.post("/", getAllData);
+qualityrouter.get("/", getAllData);
 qualityrouter.post("/search", searchData);
 
 export default qualityrouter;
