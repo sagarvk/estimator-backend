@@ -1,6 +1,7 @@
 import quality from "../models/Quality.js";
 import Desp from "../models/Desp.js";
 import Client from "../models/Client.js";
+import Master from "../models/Master.js";
 // import { jsPDF } from "jspdf";
 // import { applyPlugin } from "jspdf-autotable";
 // import DOMPurify from "dompurify";
@@ -55,7 +56,7 @@ export const getPdf = async (req, res, next) => {
     payId,
   } = req.body;
 
-  let qData, despdetails, conrate, eamt, tamt, camount, eamount;
+  let qData, mData, despdetails, conrate, eamt, tamt, camount, eamount;
   let estimatecalc = [];
   let desptable = [];
   let barea = parseInt(totalBuiltupArea);
@@ -153,10 +154,17 @@ export const getPdf = async (req, res, next) => {
       ];
 
       let edata = [];
-      let firmname = process.env.FIRM_NAME;
-      let firmadd1 = process.env.FIRM_ADD1;
-      let firmadd2 = process.env.FIRM_ADD2;
-      let firmcontact = process.env.FIRM_CONTACT;
+      try {
+        mData = await Master.find({});
+      } catch (err) {
+        console.log(err);
+      }
+
+      let firmname = mData[0].companyname;
+      let firmadd1 = mData[0].add1;
+      let firmadd2 = mData[0].add2;
+      let firmcontact = mData[0].contact;
+      let charges = mData[0].charges;
       let randomreportname = `report_${customerName}_${getRandomFileName()}`;
       let randomsummaryname = `summary_${customerName}_${getRandomFileName()}`;
       let randommergedfile = `merged_${customerName}_${getRandomFileName()}`;
@@ -171,7 +179,6 @@ export const getPdf = async (req, res, next) => {
           element.amount,
         ]);
       });
-      console.log[edata];
 
       const template = ` `;
 
@@ -364,15 +371,17 @@ export const getPdf = async (req, res, next) => {
               orderId,
               payId,
               address,
+              charges,
               filepath
             );
 
-            ////Delete temp files
+            ////Delete files
 
             try {
               unlinkSync(`./files/raw/${randomreportname}.pdf`);
               unlinkSync(`./files/raw/${randomsummaryname}.pdf`);
               unlinkSync(`./files/raw/${randommergedfile}.pdf`);
+              // unlinkSync(`./files/${finalPDF}.pdf`);
               console.log(`successfully deleted `);
             } catch (error) {
               console.error("there was an error:", error.message);
@@ -607,10 +616,9 @@ function sendMail(
   orderId,
   payId,
   address,
-
+  amtPaid,
   filepath
 ) {
-  let amtPaid = 499;
   let transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 587,
@@ -765,12 +773,23 @@ export const genpayOrder = async (req, res, next) => {
     mobileNo,
     mailId,
   } = req.body;
+  let mData;
+  try {
+    mData = await Master.find({});
+  } catch (err) {
+    console.log(err);
+  }
+  let keyid = mData[0].keyid;
+  let keysecret = mData[0].keysecret;
+  // let keyid = process.env.KEY_ID;
+  // let keysecret = process.env.KEY_SECRET;
+  let payamt = mData[0].charges;
+
   let instance = new Razorpay({
-    key_id: process.env.key_id,
-    key_secret: process.env.key_secret,
+    key_id: keyid,
+    key_secret: keysecret,
   });
 
-  let payamt = parseInt(process.env.PAY_AMT);
   let options = {
     amount: payamt * 100, // amount in the smallest currency unit
     currency: "INR",
