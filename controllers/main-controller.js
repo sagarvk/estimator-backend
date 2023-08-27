@@ -215,7 +215,7 @@ export const getPdf = async (req, res, next) => {
 
         const htmlMarkupdetailpage = render(detailpage, {
           edata,
-          firmname: firmname,
+          firmname: firmname.toUpperCase(),
           tdate: todaydate,
           lrow: lrow,
         });
@@ -231,7 +231,8 @@ export const getPdf = async (req, res, next) => {
           floors: parseInt(numOfFloors).toFixed(2),
           totalamt: tamt.toFixed(2),
           ratepersqft: (tamt / barea).toFixed(2),
-          firmname: firmname,
+          firmname: firmname.toUpperCase(),
+          tdate: todaydate,
         });
 
         const browser = await puppeteer.launch({ headless: "true" });

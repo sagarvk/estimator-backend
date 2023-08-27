@@ -7,6 +7,6 @@ import { getAllData } from "../controllers/master-controller.js";
 // let qualitySchema = require("../models/Quality");
 
 // Get Quality Data
-masterrouter.get("/", getAllData);
+masterrouter.post("/", getAllData);
 
 export default masterrouter;
