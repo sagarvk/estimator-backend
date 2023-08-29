@@ -382,7 +382,7 @@ export const getPdf = async (req, res, next) => {
               unlinkSync(`./files/raw/${randomreportname}.pdf`);
               unlinkSync(`./files/raw/${randomsummaryname}.pdf`);
               unlinkSync(`./files/raw/${randommergedfile}.pdf`);
-              unlinkSync(`./files/${finalPDF}.pdf`);
+              // unlinkSync(`./files/${finalPDF}.pdf`);
               console.log(`successfully deleted `);
             } catch (error) {
               console.error("there was an error:", error.message);
