@@ -830,6 +830,95 @@ function genPDF(data, name, add, area) {
   doc.save("sample.pdf");
 }
 
+export const contactUs = async (req, res, next) => {
+  const { name, email, mailmessage } = req.body;
+
+  let transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false, // upgrade later with STARTTLS
+    auth: {
+      user: process.env.MAIL_ID,
+      pass: process.env.MAIL_PASS,
+    },
+  });
+
+  let message = {
+    from: "estimatorproconsultants@gmail.com",
+    to: "estimatorproconsultants@gmail.com",
+    subject: `Contact Us Response by - ${name}`,
+    text: "",
+    html: ` <!DOCTYPE html>
+    <html lang="en">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Template</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+      }
+    
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+    
+      .customer-data {
+        margin-bottom: 20px;
+      }
+    
+      .label {
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+    
+      .value {
+        margin-bottom: 15px;
+      }
+    
+      @media screen and (max-width: 600px) {
+        .container {
+          padding: 10px;
+        }
+      }
+    </style>
+    </head>
+    <body>
+      <div class="container">
+        <h2>Contact Information</h2>
+        <div class="customer-data">
+          <span class="label">Customer Name:</span>
+          <span class="value">${name}</span>
+        </div>
+        <div class="customer-data">
+          <span class="label">Email ID:</span>
+          <span class="value">j${email}</span>
+        </div>
+        <div class="customer-data">
+          <span class="label">Message:</span>
+          <p class="value">${mailmessage}</p>
+        </div>
+      </div>
+    </body>
+    </html>
+     `,
+  };
+
+  let mailed = transporter.sendMail(message);
+  if (!mailed) {
+    return res.status(404).json({ message: "No Data Found" });
+  }
+  return res.status(200).json({ success: true, data: mailed });
+};
+
 const getRates = async (req, res, next) => {
   const constructionQuality = req.body.constructionQuality;
   let qData;

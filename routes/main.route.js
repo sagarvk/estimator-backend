@@ -7,6 +7,7 @@ import {
   getEAmt,
   genpayOrder,
   payVerify,
+  contactUs,
 } from "../controllers/main-controller.js";
 
 //Get Estimate PDF Data
@@ -17,5 +18,7 @@ estimaterouter.post("/eamt", getEAmt);
 estimaterouter.post("/createorder", genpayOrder);
 //Generate Payment Order
 estimaterouter.post("/payverify", payVerify);
+//Send Contact Us Form
+estimaterouter.post("/contactus", contactUs);
 
 export default estimaterouter;
