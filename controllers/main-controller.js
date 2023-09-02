@@ -811,7 +811,7 @@ export const payVerify = async (req, res, next) => {
     req.body.response.razorpay_payment_id;
 
   var expectedSignature = crypto
-    .createHmac("sha256", process.env.key_secret)
+    .createHmac("sha256", process.env.KEY_SECRET)
     .update(body.toString())
     .digest(`hex`);
   if (expectedSignature === req.body.response.razorpay_signature) {
