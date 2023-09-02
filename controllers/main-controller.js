@@ -850,8 +850,20 @@ export const payVerify = async (req, res, next) => {
     "|" +
     req.body.response.razorpay_payment_id;
 
+  let mData;
+  try {
+    mData = await Master.find({});
+  } catch (err) {
+    console.log(err);
+  }
+  let keyid = mData[0].keyid;
+  let keysecret = mData[0].keysecret;
+  // let keyid = process.env.KEY_ID;
+  // let keysecret = process.env.KEY_SECRET;
+  let payamt = mData[0].charges;
+
   var expectedSignature = crypto
-    .createHmac("sha256", process.env.key_secret)
+    .createHmac("sha256", keysecret)
     .update(body.toString())
     .digest(`hex`);
   if (expectedSignature === req.body.response.razorpay_signature) {
