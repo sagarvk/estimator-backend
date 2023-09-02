@@ -23,4 +23,8 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+<<<<<<< HEAD
 .cache
+=======
+.cache
+>>>>>>> b6f1b2a88a10f3ef3bbd5b3d4aa220fd2f2fdbb7
