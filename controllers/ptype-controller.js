@@ -1,4 +1,4 @@
-import ptype from "../models/ptype.js";
+import ptype from "../models/Ptype.js";
 
 export const getAllData = async (req, res, next) => {
   let qData;

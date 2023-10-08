@@ -8,6 +8,7 @@ import {
   genpayOrder,
   payVerify,
   contactUs,
+  stripeCheckout,
 } from "../controllers/main-controller.js";
 
 //Get Estimate PDF Data
@@ -20,5 +21,8 @@ estimaterouter.post("/createorder", genpayOrder);
 estimaterouter.post("/payverify", payVerify);
 //Send Contact Us Form
 estimaterouter.post("/contactus", contactUs);
+
+//Stripe Payment Gateway
+estimaterouter.post("/stripecheckout", stripeCheckout);
 
 export default estimaterouter;

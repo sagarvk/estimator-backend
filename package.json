@@ -2,7 +2,7 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -38,11 +38,13 @@
     "pdf-lib": "^1.17.1",
     "pdf-merge": "^1.2.0",
     "pdf-merger-js": "^4.3.0",
+    "pdfmake": "^0.2.7",
     "pdfmerge": "^1.0.2",
-    "puppeteer": "^21.1.1",
+    "puppeteer": "^21.2.1",
     "puppeteer-report": "^3.0.1",
     "razorpay": "^2.9.1",
     "rimraf": "^5.0.1",
+    "stripe": "^13.6.0",
     "tar-fs": "^3.0.4",
     "unrar-promise": "^3.1.0"
   },
@@ -54,5 +56,4 @@
     "@babel/preset-env": "^7.22.14",
     "cross-env": "^7.0.3"
   }
-  
 }
