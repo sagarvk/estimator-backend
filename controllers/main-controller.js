@@ -8,7 +8,6 @@ import { jsPDF } from "jspdf";
 // import autoTable from "jspdf-autotable";
 import ejs from "ejs";
 import pdf from "html-pdf";
-import puppeteer from "puppeteer";
 import { readFileSync } from "fs";
 import { render } from "ejs";
 // import "jspdf-autotable";
